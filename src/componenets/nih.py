@@ -21,5 +21,5 @@ class NIH(Dataset):
     def __getitem__(self, index) -> Dict[str, Any]:
         return 0
     
-    def __len__(self):
+    def __len__(self) -> int:
         return 0
