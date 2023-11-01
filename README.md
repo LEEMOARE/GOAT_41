@@ -36,3 +36,18 @@ flowchart TD
     D --> E
     C -- "no" --> E
 ```
+</div>
+
+## 1. Usage
+
+### 1.1 how to train? 
+
+```python
+python3 train.py tbu
+```
+
+### 1.2 how to evaluation?
+
+```python
+python3 evaluate.py tbu
+```
