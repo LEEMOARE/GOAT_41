@@ -33,5 +33,5 @@ class NIH(Dataset):
         label = dummy['label']
         return {'image': image, 'label': label}
     
-    def __len__(self):
+    def __len__(self) -> int:
         return 0
