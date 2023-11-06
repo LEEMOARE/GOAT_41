@@ -6,8 +6,8 @@ from nih import NIH  # nih.py 파일에서 NIH 클래스를 import
 from sklearn.model_selection import train_test_split
 
 transform = transforms.Compose([
-    transforms.Resize((224, 224)),  # 이미지 크기를 224x224로 변경
-    transforms.ToTensor(),  # 이미지를 PyTorch 텐서로 변환
+    transforms.Resize((224, 224)),  # 크기를 224x224로 변경
+    transforms.ToTensor(),  # PyTorch 텐서로 변환
 ])
 
 
