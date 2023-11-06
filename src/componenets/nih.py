@@ -28,10 +28,10 @@ class NIH(Dataset):
         self.split = split
         dataframe = pd.read_csv(csv_file)
 
-        # 데이터프레임을 훈련 데이터프레임과 테스트 데이터프레임으로 나눕니다.
+        # 데이터프레임을 훈련 데이터프레임과 테스트 데이터프레임으로 나눔니다.
         train_dataframe, test_dataframe = train_test_split(dataframe, test_size=0.3, random_state=random_state)
 
-        # split 매개변수에 따라 self.dataframe를 설정합니다.
+        # split 매개변수에 따라 self.dataframe를 설정.
         if self.split == 'train':
             self.dataframe = train_dataframe
         else:
