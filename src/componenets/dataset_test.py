@@ -14,7 +14,7 @@ transform = transforms.Compose([
 train_dataset = NIH(csv_file="C:\\Users\\gjaischool\\Desktop\\archive (1)\\Data_Entry_2017.csv", root_dir='C:\\Users\\gjaischool\\Desktop\\archive (1)\\image',transform=transform,split='train')
 test_dataset = NIH(csv_file="C:\\Users\\gjaischool\\Desktop\\archive (1)\\Data_Entry_2017.csv", root_dir='C:\\Users\\gjaischool\\Desktop\\archive (1)\\image',transform=transform,split='test')
 
-# 첫 번째 데이터 접근
+
 first_train_data = train_dataset[56908]
 first_test_data = test_dataset[5462]
 
