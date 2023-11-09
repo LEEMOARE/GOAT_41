@@ -10,8 +10,8 @@ National Institutes of Health Chest X-Ray Dataset. [[paper]](https://openaccess.
 
 In our dataset, we have several columns representing different aspects of the data. Here is a brief description of each column:
 
-- `Image Index`: This column is a column representing the index or filename of the image and is used as a unique identifier for each image.
-- `Finding Labels`: This column contains medical findings or disease labels found in the image. Multiple labels can be separated by commas.
+- `Image Index : This column is a column representing the index or filename of the image and is used as a unique identifier for each image.
+- `Finding Labels : This column contains medical findings or disease labels found in the image. Multiple labels can be separated by commas.
 - 'Follow-up #': This column represents the number of follow-ups of the patient. It can be used to connect multiple images of the same patient.
 - 'Patient Age': This column represents the patient's age.
 - 'Patient Gender': This column is a column representing the sex of the patient.
