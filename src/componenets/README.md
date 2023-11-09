@@ -17,8 +17,8 @@ In our dataset, we have several columns representing different aspects of the da
 - 'Patient Gender': This column is a column representing the sex of the patient.
 - 'View Position' : This column is a column representing the patient's body part or location during image capture.
 - 'OriginalImage[WidthHeight]' : This column represents the horizontal and vertical resolution of the image.
-- OriginalImagePixelSpacing[x y]: This column represents the pixel spacing of the image. x and y represent pixel intervals in horizontal and vertical directions, respectively.
-- Label Numbers: This column is a numeric column of medical findings about images.This number represents a label and can be represented as text in the "Finding Labels" column.
+- OriginalImagePixelSpacing[x y] : This column represents the pixel spacing of the image. x and y represent pixel intervals in horizontal and vertical directions, respectively.
+- Label Numbers : This column is a numeric column of medical findings about images.This number represents a label and can be represented as text in the "Finding Labels" column.
 
 
 
