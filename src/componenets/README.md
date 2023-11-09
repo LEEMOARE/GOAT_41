@@ -36,7 +36,7 @@ In our dataset, we have several columns representing different aspects of the da
 
 ### 1.3 View Position Distribution
 
-Posteroanterior (PA) and Anteroposterior (AP) refer to the direction of the X-ray beam in chest imaging. The PA view is taken standing up and creates an image as the x-rays travel through the patient's back and toward the abdomen. AP view, unlike PA, is an imaging technique in which radiation first passes through the abdomen and then exits through the back. This photo was taken while lying down.
+- Posteroanterior (PA) and Anteroposterior (AP) refer to the direction of the X-ray beam in chest imaging. The PA view is taken standing up and creates an image as the x-rays travel through the patient's back and toward the abdomen. AP view, unlike PA, is an imaging technique in which radiation first passes through the abdomen and then exits through the back. This photo was taken while lying down.
 
 | Class Name | Counts | Ratio |
 | :--------: | :----: | :---: |
