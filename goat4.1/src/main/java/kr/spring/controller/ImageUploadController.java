@@ -18,7 +18,7 @@ public class ImageUploadController {
     @Autowired
     private AmazonS3 s3Client;
 
-    private String bucketName = "perfume.projact";
+    private String bucketName = "//";
 
     @PostMapping("/imageupload.do")
     public String uploadImage(@RequestParam("image") MultipartFile image) throws IOException {

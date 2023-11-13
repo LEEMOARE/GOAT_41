@@ -1,27 +1,27 @@
 import os
 from typing import Any, Dict, Optional
-import label_mapping
-import cv2 
+import cv2
 from torch.utils.data import Dataset
-import pandas as pd
 from torchvision import transforms
+from PIL import Image
 
 class NIH(Dataset):
     """ NIH Dataset
 
     Args:
-        csv_file (string): Path to the csv file containing the dataset.
+        dataframe (pandas.DataFrame): A DataFrame containing the annotations. Each row in the DataFrame represents an image and contains information such as the patient ID and the labels.
         root_dir (string): Path to the root directory of the dataset.
-        transform (Dict, optional): Optional transform to be applied on a sample.
+        label_mapping (Dict): A dictionary mapping the labels in the dataframe to the desired output labels.
+        transform (callable, optional): Optional transform to be applied on a sample.
         
     Returns:
         Dict: A dictionary containing the image, its labels, follow-up number, patient ID, patient age, patient gender, 
         view position, original image width, original image height, and original image pixel spacing. 
     """
     
-    def __init__(self, csv_file:str, root_dir:str,label_mapping, transform:Optional[Dict[str,Any]]=None,split='train'):
+    def __init__(self, dataframe:str, root_dir:str,label_mapping, transform:Optional[Dict[str,Any]]=None,split='train'):
         self.root_dir = root_dir
-        self.dataframe = pd.read_csv(csv_file)
+        self.dataframe = dataframe
         self.split = split
         
         if transform: 
@@ -37,7 +37,10 @@ class NIH(Dataset):
     def __getitem__(self, index:int) -> Dict[str, Any]:
         row = self.dataframe.iloc[index]
         image_path = os.path.join(self.root_dir, row['Image Index'])
-        image = Image.open(image_path).convert('RGB')
+        image = cv2.imread(image_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = Image.fromarray(image)  
+       
 
 
         if self.transform:
