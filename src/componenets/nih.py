@@ -5,6 +5,23 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from PIL import Image
 
+_MAPPER = {'Effusion': 1,
+           'Emphysema': 2,
+           'Atelectasis': 3,
+           'Edema': 4,
+           'Consolidation': 5, 
+           'Pleural_Thickening': 6,
+           'Hernia': 7,
+           'Mass': 8,
+           'No Finding': 9,
+           'Cardiomegaly': 10,
+           'Nodule': 11,
+           'Pneumothorax': 12,
+           'Pneumonia': 13,
+           'Fibrosis': 14,
+           'Infiltration': 15}
+
+
 class NIH(Dataset):
     """ NIH Dataset
 
