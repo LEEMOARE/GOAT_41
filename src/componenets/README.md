@@ -4,6 +4,29 @@
 ## 1. NIH Dataset
 National Institutes of Health Chest X-Ray Dataset. [[paper]](https://openaccess.thecvf.com/content_cvpr_2017/papers/Wang_ChestX-ray8_Hospital-Scale_Chest_CVPR_2017_paper.pdf)[[download]](https://nihcc.app.box.com/v/ChestXray-NIHCC)
 
+<br>
+<div align="center">
+<b>NIH Annotation</b>
+
+custom NIH has below keys. 
+
+</div>
+
+```python
+# example
+{'age': 58,
+ 'filename': '00000001_000.png',
+ 'followup': 0,
+ 'gender': 'm',
+ 'id': 0,
+ 'label_indexes': [10],
+ 'label_names': ['cardiomegaly'],
+ 'pid': 1,
+ 'split': 'train',
+ 'view_position': 'pa'}
+```
+
+<br>
 
 
 ### 1.1 Data Distribution
