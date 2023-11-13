@@ -25,8 +25,8 @@ In our dataset, we have several columns representing different aspects of the da
 
 | class name | counts | ratio |
 | :--------: | :----: | :---: |
-|     M      | 63340  | 0.67  |
-|     F      | 48780  | 0.44  |
+|     M      | 63340  | 0.57  |
+|     F      | 48780  | 0.43  |
 
 ### 1.3 View Position Distribution
 
@@ -34,8 +34,8 @@ In our dataset, we have several columns representing different aspects of the da
 
 | Class Name | Counts | Ratio |
 | :--------: | :----: | :---: |
-|     PA     | 67310  | 0.67  |
-|     AP     | 44810  | 0.44  |
+|     PA     | 67310  | 0.60  |
+|     AP     | 44810  | 0.40  |
 
 ### 1.4 Age Distribution
 
