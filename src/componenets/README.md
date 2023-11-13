@@ -16,28 +16,36 @@ In our dataset, we have several columns representing different aspects of the da
 - Patient Age: This column represents the patient's age.
 - Patient Gender: This column is a column representing the sex of the patient.
 - View Position : This column is a column representing the patient's body part or location during image capture.
-- OriginalImage[WidthHeight] : This column represents the horizontal and vertical resolution of the image.
-- OriginalImagePixelSpacing[x y] : This column represents the pixel spacing of the image. x and y represent pixel intervals in horizontal and vertical directions, respectively.
 - Label Numbers : This column is a numeric column of medical findings about images.This number represents a label and can be represented as text in the "Finding Labels" column.
 
 
 ### 1.2 Gender Distribution
 
-| class name | counts | ratio |
-| :--------: | :----: | :---: |
-|     M      | 63340  | 0.57  |
-|     F      | 48780  | 0.43  |
+| class name | counts  | ratio |
+| :--------: | :-----: | :---: |
+|     M      | 63,340  |  57%  |
+|     F      | 48,780  |  43%  |
+|   total    | 112,120 | 100%  |
 
 ### 1.3 View Position Distribution
 
 - Posteroanterior (PA) and Anteroposterior (AP) refer to the direction of the X-ray beam in chest imaging. The PA view is taken standing up and creates an image as the x-rays travel through the patient's back and toward the abdomen. AP view, unlike PA, is an imaging technique in which radiation first passes through the abdomen and then exits through the back. This photo was taken while lying down.
 
-| Class Name | Counts | Ratio |
-| :--------: | :----: | :---: |
-|     PA     | 67310  | 0.60  |
-|     AP     | 44810  | 0.40  |
+| Class Name | Counts  | Ratio |
+| :--------: | :-----: | :---: |
+|     PA     | 67,310  |  60%  |
+|     AP     | 44,810  |  40%  |
+|   total    | 112,120 | 100%  |
 
 ### 1.4 Age Distribution
+
+전체 나이 분포 및 성별에 따른 나이 분포
+| Category | mean  |   std   |
+| :------: | :---: | :-----: |
+|    M     | 47.19 | ± 17.23 |
+|    F     | 46.52 | ± 16.32 |
+|  total   | 46.90 | ± 16.84 |
+
 
 | Age Group | Counts | Ratio  |
 | :-------: | :----: | :----: |
