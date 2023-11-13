@@ -30,8 +30,10 @@ class NIH(Dataset):
 
     Args:
         root_dir (string): Path to the root directory of the dataset.
-        split: (strinf) : train, test, or valid
-        transform (callable, optional): Optional transform to be applied on a sample.
+        split: (string) : train, test, or valid
+        transform (Dict[str, Any]): A dictionary containing the image transformation.
+        image_size (int or tuple): The size of the image. If int, a square image is returned. If tuple, 
+            the image is resized to the size specified by the tuple.
         image_channels (int): 1 for grayscale, 3 for RGB
         
     Returns:
