@@ -1,10 +1,18 @@
 from typing import Any, Dict, Optional,List, Union, Tuple
 from pathlib import Path
 
+from typing import Any, Dict, Optional,List, Union, Tuple
+from pathlib import Path
+
 import cv2
 import torch
 import numpy as np
+import torch
+import numpy as np
 from torch.utils.data import Dataset
+
+from ..utils.common import get_repo_root, load_json
+
 
 from ..utils.common import get_repo_root, load_json
 
@@ -24,7 +32,21 @@ _MAPPER = {'effusion': 1,
            'pneumonia': 13,
            'fibrosis': 14,
            'infiltration': 15}
-
+_MAPPER = {'effusion': 1,
+           'emphysema': 2,
+           'atelectasis': 3,
+           'edema': 4,
+           'consolidation': 5, 
+           'pleural_thickening': 6,
+           'hernia': 7,
+           'mass': 8,
+           'nofinding': 9,
+           'cardiomegaly': 10,
+           'nodule': 11,
+           'pneumothorax': 12,
+           'pneumonia': 13,
+           'fibrosis': 14,
+           'infiltration': 15}
 
 class NIH(Dataset):
     """ NIH Dataset
@@ -36,8 +58,15 @@ class NIH(Dataset):
         image_size (int or tuple): The size of the image. If int, a square image is returned. If tuple, 
             the image is resized to the size specified by the tuple.
         image_channels (int): 1 for grayscale, 3 for RGB
+        split: (string) : train, test, or valid
+        transform (Dict[str, Any]): A dictionary containing the image transformation.
+        image_size (int or tuple): The size of the image. If int, a square image is returned. If tuple, 
+            the image is resized to the size specified by the tuple.
+        image_channels (int): 1 for grayscale, 3 for RGB
         
     Returns:
+        Dict: A dictionary containing the image, its labels, follow-up number, patient ID, patient age, patient gender, 
+        view position, original image width, original image height, and original image pixel spacing. 
         Dict: A dictionary containing the image, its labels, follow-up number, patient ID, patient age, patient gender, 
         view position, original image width, original image height, and original image pixel spacing. 
     """
@@ -49,8 +78,20 @@ class NIH(Dataset):
                  image_size:Union[int, Tuple[int,int]]=(1024,1024),
                  image_channels:int=3,
                  **kwargs):
+    def __init__(self, 
+                 root_dir:str, 
+                 split:str='train',
+                 transform:Optional[Dict[str,Any]]=None,
+                 image_size:Union[int, Tuple[int,int]]=(1024,1024),
+                 image_channels:int=3,
+                 **kwargs):
         self.root_dir = root_dir
         self.split = split
+        self.transform = transform
+        self.image_size = image_size if isinstance(image_size, tuple) else (image_size, image_size)
+        self.image_channels = image_channels
+
+        self.annots = self._load_annotations()
         self.transform = transform
         self.image_size = image_size if isinstance(image_size, tuple) else (image_size, image_size)
         self.image_channels = image_channels
