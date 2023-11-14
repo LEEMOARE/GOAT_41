@@ -99,6 +99,9 @@ class NIH(Dataset):
         
         if len(image.shape) == 2:
             image = np.expand_dims(image, axis=2) # (H,W) -> (H,W,1)
+        
+        if image.shape[2] == 4:
+            image = image[:,:,0:3]
     
         if self.image_channels == 3 and image.shape[2] == 1: 
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB) # (H,W,1) -> (H,W,3)
