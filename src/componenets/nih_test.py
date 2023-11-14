@@ -1,24 +1,51 @@
-from label_mapping import label_mapping
-import pandas as pd
-from NIH import NIH
-from sklearn.model_selection import train_test_split
+import pytest
+import logging
+from pathlib import Path
 
-# Load the dataset
-dataset = pd.read_csv("C:\\Users\\gjaischool\\Desktop\\goat_41\\src\\componenets\\nih.csv")
+import numpy as np
 
-# Get a list of unique patient IDs
-patient_ids = dataset['Patient ID'].unique()
+from .nih import NIH
+from ..utils.common import get_repo_root
 
-# Split the patient IDs into training and validation sets
-train_ids, val_ids = train_test_split(patient_ids, test_size=0.2, random_state=42)
+logger = logging.getLogger(__name__)
 
-# Split the dataframe into training and validation sets
-train_df = dataset[dataset['Patient ID'].isin(train_ids)]
-val_df = dataset[dataset['Patient ID'].isin(val_ids)]
+@pytest.fixture
+def nih_train():
+    return NIH(root_dir='', split='train')
 
-# Create training and validation datasets
-train_dataset = NIH(train_df, root_dir="C:\\Users\\gjaischool\\Desktop\\archive(1)\\image", label_mapping=label_mapping, split='train')
-val_dataset = NIH(val_df, root_dir="C:\\Users\\gjaischool\\Desktop\\archive(1)\\image", label_mapping=label_mapping, split='val')
+@pytest.fixture
+def nih_test():
+    return NIH(root_dir='', split='test')
 
-print(train_dataset[5])
-print(val_dataset[50])
+@pytest.fixture
+def nih_val():
+    return NIH(root_dir='', split='val')
+
+def test_nih_train_len(nih_train:NIH):
+    assert len(nih_train) == 89783, "The length of the dataset should be 89783"
+    assert nih_train.annots[0]['split'] == 'train', "The split should be train"
+    return 
+
+def test_nih_test_len(nih_test:NIH):
+    assert len(nih_test) == 11219, "The length of the dataset should be 11219"
+    assert nih_test.annots[0]['split'] == 'test', "The split should be test"
+    return
+
+def test_nih_val_len(nih_val:NIH):
+    assert len(nih_val) == 11118, "The length of the dataset should be 11118"
+    assert nih_val.annots[0]['split'] == 'val', "The split should be test"
+    return
+
+def test_nih_load_data(nih_train:NIH):
+    nih_train.root_dir = Path(get_repo_root()) / 'data'
+    nih_train.image_channels = 3
+    dummy = nih_train._load_data(0)
+    image:np.ndarray = dummy['image']
+    assert image.shape == (1024, 1024, 3), "The image should be 1024 x 1024 x 3"
+    assert image.max() == 255.0, "The image should be normalized to 255.0"
+    assert image.min() == 0.0, "The image should be normalized to 0.0"
+
+    nih_train.image_channels = 1
+    dummy = nih_train._load_data(0)
+    image:np.ndarray = dummy['image']
+    assert image.shape == (1024, 1024, 1), "The image should be 1024 x 1024 x 3"
