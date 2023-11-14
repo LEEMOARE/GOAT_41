@@ -1,37 +1,13 @@
 from typing import Any, Dict, Optional,List, Union, Tuple
 from pathlib import Path
 
-from typing import Any, Dict, Optional,List, Union, Tuple
-from pathlib import Path
-
 import cv2
-import torch
-import numpy as np
 import torch
 import numpy as np
 from torch.utils.data import Dataset
 
 from ..utils.common import get_repo_root, load_json
 
-
-from ..utils.common import get_repo_root, load_json
-
-
-_MAPPER = {'effusion': 1,
-           'emphysema': 2,
-           'atelectasis': 3,
-           'edema': 4,
-           'consolidation': 5, 
-           'pleural_thickening': 6,
-           'hernia': 7,
-           'mass': 8,
-           'nofinding': 9,
-           'cardiomegaly': 10,
-           'nodule': 11,
-           'pneumothorax': 12,
-           'pneumonia': 13,
-           'fibrosis': 14,
-           'infiltration': 15}
 _MAPPER = {'effusion': 1,
            'emphysema': 2,
            'atelectasis': 3,
@@ -78,20 +54,8 @@ class NIH(Dataset):
                  image_size:Union[int, Tuple[int,int]]=(1024,1024),
                  image_channels:int=3,
                  **kwargs):
-    def __init__(self, 
-                 root_dir:str, 
-                 split:str='train',
-                 transform:Optional[Dict[str,Any]]=None,
-                 image_size:Union[int, Tuple[int,int]]=(1024,1024),
-                 image_channels:int=3,
-                 **kwargs):
         self.root_dir = root_dir
         self.split = split
-        self.transform = transform
-        self.image_size = image_size if isinstance(image_size, tuple) else (image_size, image_size)
-        self.image_channels = image_channels
-
-        self.annots = self._load_annotations()
         self.transform = transform
         self.image_size = image_size if isinstance(image_size, tuple) else (image_size, image_size)
         self.image_channels = image_channels
