@@ -8,7 +8,6 @@ from torch.utils.data import Dataset
 
 from ..utils.common import get_repo_root, load_json
 
-
 _MAPPER = {'effusion': 1,
            'emphysema': 2,
            'atelectasis': 3,
@@ -33,12 +32,10 @@ class NIH(Dataset):
         split: (string) : train, test, or valid
         transform (Dict[str, Any]): A dictionary containing the image transformation.
         image_size (int or tuple): The size of the image. If int, a square image is returned. If tuple, 
-            the image is resized to the size specified by the tuple.
+                                    the image is resized to the size specified by the tuple.
         image_channels (int): 1 for grayscale, 3 for RGB
         
     Returns:
-        Dict: A dictionary containing the image, its labels, follow-up number, patient ID, patient age, patient gender, 
-        view position, original image width, original image height, and original image pixel spacing. 
         Dict: A dictionary containing the image, its labels, follow-up number, patient ID, patient age, patient gender, 
         view position, original image width, original image height, and original image pixel spacing. 
     """
@@ -106,7 +103,7 @@ class NIH(Dataset):
         if self.image_channels == 3 and image.shape[2] == 1: 
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB) # (H,W,1) -> (H,W,3)
 
-        # min-max normalization
+        # min-max normalization 
         image = image.astype(np.float32)
         image = (image - np.min(image)) / (np.max(image) - np.min(image))
         # to 8bit image 

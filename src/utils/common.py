@@ -17,7 +17,3 @@ def load_json(path:Union[str, Path]):
     else:
         with open(path, 'r') as f:
             return json.load(f)
-        
-    
-
-

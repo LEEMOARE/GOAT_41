@@ -48,4 +48,6 @@ def test_nih_load_data(nih_train:NIH):
     nih_train.image_channels = 1
     dummy = nih_train._load_data(0)
     image:np.ndarray = dummy['image']
-    assert image.shape == (1024, 1024, 1), "The image should be 1024 x 1024 x 3"
+    assert image.shape == (1024, 1024, 1), "The image should be 1024 x 1024 x 1"
+    assert image.max() == 255.0, "The image should be normalized to 255.0"
+    assert image.min() == 0.0, "The image should be normalized to 0.0"
