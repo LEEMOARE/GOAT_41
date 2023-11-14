@@ -71,7 +71,7 @@ class NIH(Dataset):
 
         return {'image':image,
                 'label': labels,
-                'path': path}
+                'path': str(path)}
 
     def __len__(self) -> int:
         return len(self.annots)
