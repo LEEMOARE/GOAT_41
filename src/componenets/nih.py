@@ -39,6 +39,8 @@ class NIH(Dataset):
     Returns:
         Dict: A dictionary containing the image, its labels, follow-up number, patient ID, patient age, patient gender, 
         view position, original image width, original image height, and original image pixel spacing. 
+        Dict: A dictionary containing the image, its labels, follow-up number, patient ID, patient age, patient gender, 
+        view position, original image width, original image height, and original image pixel spacing. 
     """
     
     def __init__(self, 
