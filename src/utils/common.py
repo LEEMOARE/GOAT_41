@@ -18,6 +18,7 @@ def load_json(path:Union[str, Path]):
         with open(path, 'r') as f:
             return json.load(f)
         
+        
     
 
 

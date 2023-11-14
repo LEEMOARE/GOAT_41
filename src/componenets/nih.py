@@ -25,6 +25,7 @@ _MAPPER = {'effusion': 1,
            'fibrosis': 14,
            'infiltration': 15}
 
+
 class NIH(Dataset):
     """ NIH Dataset
 
@@ -104,7 +105,7 @@ class NIH(Dataset):
         if self.image_channels == 3 and image.shape[2] == 1: 
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB) # (H,W,1) -> (H,W,3)
 
-        # min-max normalization
+        # min-max normalization 
         image = image.astype(np.float32)
         image = (image - np.min(image)) / (np.max(image) - np.min(image))
         # to 8bit image 
