@@ -2,5 +2,21 @@ from functools import partial
 
 from torch.utils.data import DataLoader
 
+from ..componenets.nih import NIH
 
-DataLoaderNIHTrain = partial(DataLoader, batch_size=32, shuffle=True, num_workers=4, pin_memory=True)
+
+_TRAIN_BASIC_SETTINGS = {'shuffle': True, 'num_workers': 1, 'pin_memory': True, 'drop_last': True}
+_VAL_BASIC_SETTINGS = {'shuffle': False, 'num_workers': 1, 'pin_memory': True, 'drop_last': False}
+_TEST_BASIC_SETTINGS = {'shuffle': False, 'num_workers': 1, 'pin_memory': True, 'drop_last': False}
+
+
+def get_NIH_dataloader(dataset:NIH, batch_size:int, use_basic:bool=True, **kwargs):
+    if use_basic and dataset.split == 'train':
+        return DataLoader(dataset, batch_size=batch_size, **_TRAIN_BASIC_SETTINGS)
+    elif use_basic and dataset.split == 'val':
+        return DataLoader(dataset, batch_size=batch_size, **_VAL_BASIC_SETTINGS)
+    elif use_basic and dataset.split == 'test':
+        return DataLoader(dataset, batch_size=batch_size, **_TEST_BASIC_SETTINGS)
+    else:
+        return DataLoader(dataset, batch_size=batch_size, **kwargs)
+    
