@@ -67,7 +67,7 @@ class NIH(Dataset):
             image = transformed['image']
         
         image = torch.Tensor(image).permute(2,0,1) # (H,W,3 or 1) -> (3 or 1, H, W)
-        labels = torch.Tensor(labels).long()
+        labels = torch.Tensor(labels).long()[:2]
 
         return {'image':image,
                 'label': labels,
