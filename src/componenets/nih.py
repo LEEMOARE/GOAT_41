@@ -96,7 +96,6 @@ class NIH(Dataset):
         image_path = Path(self.root_dir) / filename
         image = cv2.imread(str(image_path), cv2.IMREAD_UNCHANGED)
         
-        # resize to 1024 x 1024
         image = cv2.resize(image, self.image_size, interpolation=cv2.INTER_LINEAR)
         
         if len(image.shape) == 2:
@@ -108,6 +107,7 @@ class NIH(Dataset):
         # min-max normalization
         image = image.astype(np.float32)
         image = (image - np.min(image)) / (np.max(image) - np.min(image))
+        # to 8bit image 
         image = image * 255.0
         image = image.astype(np.uint8)
 
