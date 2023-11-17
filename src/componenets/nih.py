@@ -67,11 +67,11 @@ class NIH(Dataset):
             image = transformed['image']
         
         image = torch.Tensor(image).permute(2,0,1) # (H,W,3 or 1) -> (3 or 1, H, W)
-        labels = torch.Tensor(labels).long()
+        labels = torch.Tensor(labels).long()[0]
 
         return {'image':image,
                 'label': labels,
-                'path': path}
+                'path': str(path)}
 
     def __len__(self) -> int:
         return len(self.annots)
@@ -99,6 +99,9 @@ class NIH(Dataset):
         
         if len(image.shape) == 2:
             image = np.expand_dims(image, axis=2) # (H,W) -> (H,W,1)
+        
+        if image.shape[2] == 4:
+            image = image[:,:,0:3]
     
         if self.image_channels == 3 and image.shape[2] == 1: 
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB) # (H,W,1) -> (H,W,3)
