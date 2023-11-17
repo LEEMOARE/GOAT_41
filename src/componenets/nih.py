@@ -74,9 +74,8 @@ class NIH(Dataset):
         if self.transform is not None:
             transformed = self.transform(image=image)
             image = transformed['image']
-
-        image = torch.Tensor(image).permute(
-            2, 0, 1)  # (H,W,3 or 1) -> (3 or 1, H, W)
+        # (H,W,3 or 1) -> (3 or 1, H, W)
+        image = torch.Tensor(image).permute(2, 0, 1)
         labels = torch.Tensor(labels).long()
 
         return {'image': image,
@@ -116,6 +115,9 @@ class NIH(Dataset):
 
         for label_index in label_indexes:
             if label_index not in list(_LESIOM_TO_TRAIN_ID.keys()):
+                continue
+
+            if label_index == 9:
                 continue
             train_ids[_LESIOM_TO_TRAIN_ID[label_index]-1] = 1
 
