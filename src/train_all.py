@@ -1,9 +1,9 @@
+import torch
+import torch.nn as nn
+
 from .componenets.nih import NIH
 from .datamodules.datamodule import get_NIH_dataloader
 from .models.resnet import NIHResNet
-
-import torch
-import torch.nn as nn
 
 
 def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', device: int = 0, max_epoch: int = 100):

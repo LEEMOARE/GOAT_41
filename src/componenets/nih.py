@@ -1,9 +1,9 @@
-from typing import Any, Dict, Optional, List, Union, Tuple
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import cv2
-import torch
 import numpy as np
+import torch
 from torch.utils.data import Dataset
 
 from ..utils.common import get_repo_root, load_json
