@@ -1,14 +1,17 @@
-import git
 import json
+import zipfile
 from pathlib import Path
 from typing import Union
-import zipfile
+
+import git
+
 
 def get_repo_root() -> str:
     repo = git.Repo('.', search_parent_directories=True)
     return repo.working_tree_dir
 
-def load_json(path:Union[str, Path]):
+
+def load_json(path: Union[str, Path]):
     if Path(path).suffix == '.zip':
         with zipfile.ZipFile(path, 'r') as zip_ref:
             for file in zip_ref.namelist():

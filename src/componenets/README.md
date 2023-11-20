@@ -88,23 +88,23 @@ In our dataset, we have several columns representing different aspects of the da
 
 In our dataset, we have converted the labels representing different lesions into numbers for easier processing and analysis. Here is the mapping we used:
 
-|    Lesion Name     | Number |                       Description                       | Count | Ratio  |
-| :----------------: | :----: | :-----------------------------------------------------: | :---: | :----: |
-|      Effusion      |   1    |                 Fluid around the lungs                  | 13317 | 0.094  |
-|     Emphysema      |   2    |           Damage to the air sacs in the lungs           | 2516  | 0.017  |
-|    Atelectasis     |   3    |                Collapsed or closed lung                 | 11559 | 0.081  |
-|       Edema        |   4    |             Swelling caused by excess fluid             | 2303  | 0.016  |
-|   Consolidation    |   5    |           Area of the lung filled with fluid            | 4667  | 0.032  |
-| Pleural_Thickening |   6    |          Thickening of the lining of the lungs          | 3385  | 0.023  |
-|       Hernia       |   7    | Organ pushes through an opening in the muscle or tissue |  227  | 0.0016 |
-|        Mass        |   8    |            Abnormal lump or growth of cells             | 5782  | 0.040  |
-|     No Finding     |   9    |                  No abnormality found                   | 60361 | 0.426  |
-|    Cardiomegaly    |   10   |                     Enlarged heart                      | 2776  | 0.019  |
-|       Nodule       |   11   |                   Small lump of cells                   | 6331  | 0.044  |
-|    Pneumothorax    |   12   |                     Collapsed lung                      | 5302  | 0.037  |
-|     Pneumonia      |   13   |                Inflammation of the lungs                | 1431  | 0.010  |
-|      Fibrosis      |   14   |                  Scarring of the lungs                  | 1686  | 0.011  |
-|    Infiltration    |   15   |              Substance passes into tissue               | 19894 | 0.140  |
+|    Lesion Name     | Number |                       Description                       | Count | Ratio  | training |
+| :----------------: | :----: | :-----------------------------------------------------: | :---: | :----: | :------: |
+|      Effusion      |   1    |                 Fluid around the lungs                  | 13317 | 0.094  |    V     |
+|     Emphysema      |   2    |           Damage to the air sacs in the lungs           | 2516  | 0.017  |          |
+|    Atelectasis     |   3    |                Collapsed or closed lung                 | 11559 | 0.081  |    V     |
+|       Edema        |   4    |             Swelling caused by excess fluid             | 2303  | 0.016  |          |
+|   Consolidation    |   5    |           Area of the lung filled with fluid            | 4667  | 0.032  |          |
+| Pleural_Thickening |   6    |          Thickening of the lining of the lungs          | 3385  | 0.023  |          |
+|       Hernia       |   7    | Organ pushes through an opening in the muscle or tissue |  227  | 0.0016 |          |
+|        Mass        |   8    |            Abnormal lump or growth of cells             | 5782  | 0.040  |    V     |
+|     No Finding     |   9    |                  No abnormality found                   | 60361 | 0.426  |    V     |
+|    Cardiomegaly    |   10   |                     Enlarged heart                      | 2776  | 0.019  |          |
+|       Nodule       |   11   |                   Small lump of cells                   | 6331  | 0.044  |    V     |
+|    Pneumothorax    |   12   |                     Collapsed lung                      | 5302  | 0.037  |    V     |
+|     Pneumonia      |   13   |                Inflammation of the lungs                | 1431  | 0.010  |    -     |
+|      Fibrosis      |   14   |                  Scarring of the lungs                  | 1686  | 0.011  |          |
+|    Infiltration    |   15   |              Substance passes into tissue               | 19894 | 0.140  |    V     |
 
 You can refer to this table to understand the correspondence between the lesion names and the numbers used in the analysis.
 
