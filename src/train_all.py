@@ -35,7 +35,7 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
     model.to(device)
 
     criterion = torch.nn.BCEWithLogitsLoss(reduction='mean')
-    optimizer = torch.optim.RAdam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.RAdam(model.parameters(), lr=0.0001)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
                                                      milestones=[50, 70],
                                                      gamma=0.1)
@@ -60,23 +60,21 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
             loss.backward()
             optimizer.step()
 
-            print(f'iteration {num_epoch:5d} loss: {loss.item():.4f}')
-
             for idx_lesion in range(num_classes):
                 sens_per_lesion[idx_lesion].update(
                     logits[:, idx_lesion], labels[:, idx_lesion])
                 spec_per_lesion[idx_lesion].update(
                     logits[:, idx_lesion], labels[:, idx_lesion])
 
-            computed_sens = [sens_per_lesion[idx_lesion].compute()
+            computed_sens = [sens_per_lesion[idx_lesion].compute().item()
                              for idx_lesion in range(num_classes)]
-            computed_spec = [spec_per_lesion[idx_lesion].compute()
+            computed_spec = [spec_per_lesion[idx_lesion].compute().item()
                              for idx_lesion in range(num_classes)]
 
-            print(computed_sens)
-            print(computed_spec)
-
-            if num_iter == 10:
-                break
+            if num_iter % 10 == 0:
+                print(
+                    f'epoch {num_epoch:03d}\titeration {num_iter:5d} {num_iter/len(loader_train)*100:.0f}\tloss: {loss.item():.4f}')
+                print(computed_sens)
+                print(computed_spec)
 
         scheduler.step()
