@@ -84,4 +84,4 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
             
         avg_test_loss = sum(test_losses) / len(test_losses)
         print(f'Testing - Test Loss: {avg_test_loss:.4f}, Accuracy: {acc:.2f}')
-
+        
