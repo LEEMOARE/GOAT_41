@@ -19,7 +19,7 @@ class NIHResNet(nn.Module):
 
         init_prob = 0.01
         self.initial_prob = torch.tensor((1.0 - init_prob) / init_prob)
-        nn.init.constant_(self.conv[-1].bias, -torch.log(self.initial_prob))
+        nn.init.constant_(self.header[-1].bias, -torch.log(self.initial_prob))
 
     def forward(self, x):
         features = self.model(x)[-1]  # last feature map (B 2048 H/32 )
