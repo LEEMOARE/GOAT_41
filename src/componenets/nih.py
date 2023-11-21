@@ -65,6 +65,8 @@ class NIH(Dataset):
 
         self.annots = self._load_annotations()
 
+        self.num_classes = 5
+
     def __getitem__(self, index: int) -> Dict[str, Any]:
         annot = self._load_data(index)
         image: np.ndarray = annot['image']  # (H,W,3 or 1)
