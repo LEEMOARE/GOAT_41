@@ -85,4 +85,3 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
         avg_test_loss = sum(test_losses) / len(test_losses)
         print(f'Testing - Test Loss: {avg_test_loss:.4f}, Accuracy: {acc:.2f}')
 
-train(root_dir='C:\\Users\\gjaischool\\Desktop\\archive(1)\\image', batch_size=8, model_name='resnet50', device=0, max_epoch=20)
