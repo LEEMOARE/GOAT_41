@@ -32,22 +32,28 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
     model.to(device)
 
     criterion = torch.nn.BCEWithLogitsLoss(reduction='mean')
-    optimizer = nn.optim.RMSprop(model.parameters(), lr=0.001)
+    optimizer = torch.optim.RAdam(model.parameters(), lr=0.001)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
+                                                     milestones=[50, 70],
+                                                     gamma=0.1)
 
-    for i in range(max_epoch):  # epoch
-        for j, batch in enumerate(loader_train):
+    for num_epoch in range(max_epoch):  # epoch
+        for num_iter, batch in enumerate(loader_train):
             image: torch.Tensor = batch['image']
-            labels: torch.Tensor = batch['labels']
+            labels: torch.Tensor = batch['label']
             image = image.to(device)
             labels = labels.to(device)
 
             logits = model(image)
 
-            loss: torch.Tensor = criterion(logits, labels)
+            optimizer.zero_grad()
 
-            print(f'iteration {i:5d} loss: {loss.item():.4f}')
-
+            loss: torch.Tensor = criterion(logits, labels.to(torch.float32))
             loss.backward()
+            optimizer.step()
 
-            if i == 10:
+            print(f'iteration {num_epoch:5d} loss: {loss.item():.4f}')
+
+            if num_iter == 10:
                 break
+        scheduler.step()
