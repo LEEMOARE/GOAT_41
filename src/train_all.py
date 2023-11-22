@@ -47,7 +47,7 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
     spec_per_lesion = [Specificity(task='binary', num_classes=1).to(device)
                        for _ in range(num_classes)]
     
-    min_loss = float('inf')
+
 
     for num_epoch in range(max_epoch):  # epoch
         for num_iter, batch in enumerate(loader_train):
@@ -80,11 +80,11 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
                     f'epoch {num_epoch:03d}\titeration {num_iter:5d} {num_iter/len(loader_train)*100:.0f}\tloss: {loss.item():.4f}')
                 print(["{:.6f}".format(sens) for sens in computed_sens])
                 print(["{:.6f}".format(spec) for spec in computed_spec])
-            model.eval()
-            with torch.no_grad():
+        model.eval()
+        with torch.no_grad():
                 correct = 0
                 total = 0
-                for images, labels in loader_valid:
+                for images, labels in loader_test:
                     images = images.to(device)
                     labels = labels.to(device)
                     outputs = model(images)
@@ -100,7 +100,7 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
                 else:
                     print("Warning: No valid data found.")
 
-            model.train()
+        model.train()
             
-            scheduler.step()
+        scheduler.step()
 
