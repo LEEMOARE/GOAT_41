@@ -4,7 +4,7 @@ import torch.nn as nn
 
 
 class NIHResNet(nn.Module):
-    def __init__(self, name: str, num_classs: int = 5, out_indices=[4], return_logits=False):
+    def __init__(self, name: str, num_classs: int = 10, out_indices=[4], return_logits=False):
         super().__init__()
         assert name in ['resnet50', 'resnet101']
         self.model = timm.create_model(name,
