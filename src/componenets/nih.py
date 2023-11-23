@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
-from torchvision import transforms
+
 import cv2
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-
+from torchvision import transforms
 
 from ..utils.common import get_repo_root, load_json
 
@@ -32,11 +32,11 @@ _LESIOM_TO_TRAIN_ID = {9: 0,  # nofinding train id is 0
                        3: 3,  # atelectasis train id is 3
                        12: 4,  # pneumothorax train id is 4
                        15: 5,  # infiltration train id is 5
-                        2: 6,  # emphysema train id is 6
-                        4: 7,  # edema train id is 7
-                        5: 8,  # consolidation train id is 8
-                        6: 9,  # pleural_thickening train id is 9
-                        10: 10}  # cardiomegaly train id is 10
+                       2: 6,  # emphysema train id is 6
+                       4: 7,  # edema train id is 7
+                       5: 8,  # consolidation train id is 8
+                       6: 9,  # pleural_thickening train id is 9
+                       10: 10}  # cardiomegaly train id is 10
 
 
 class NIH(Dataset):
@@ -64,25 +64,32 @@ class NIH(Dataset):
                  **kwargs):
         self.root_dir = root_dir
         self.split = split
-        if transform is not None:
-            self.transform = transforms.Compose([
-                transforms.Resize((1024, 1024)),  # 이미지 크기 조정
-                transforms.RandomHorizontalFlip(),  # 데이터 증강을 위한 무작위 수평 뒤집기
-                transforms.RandomVerticalFlip(),  # 데이터 증강을 위한 무작위 수직 뒤집기
-                transforms.RandomRotation(30),  # 최대 30도로 무작위 회전
-                transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),  # 색상, 대비, 밝기 조절
-                transforms.RandomResizedCrop((1024, 1024), scale=(0.8, 1.0)),  # 무작위로 크기를 조절하고 잘라내기
-                transforms.GaussianBlur(3, sigma=(0.1, 2.0)),  # 가우시안 블러 적용      
-        ])
-        else:
-            self.transform = transform
-        self.image_size = image_size if isinstance(
-            image_size, tuple) else (image_size, image_size)
+        self.image_size = image_size if isinstance(image_size, tuple) \
+            else (image_size, image_size)
+
+        if transform is None:
+            self.transform = transforms.Compose([transforms.Resize(self.image_size),  # 이미지 크기 조정
+                                                 transforms.RandomHorizontalFlip(),  # 데이터 증강을 위한 무작위 수평 뒤집기
+                                                 transforms.RandomVerticalFlip(),  # 데이터 증강을 위한 무작위 수직 뒤집기
+                                                 # 최대 30도로 무작위 회전
+                                                 transforms.RandomRotation(30),
+                                                 # 색상, 대비, 밝기 조절
+                                                 transforms.ColorJitter(brightness=0.2,
+                                                                        contrast=0.2,
+                                                                        saturation=0.2),
+                                                 # 무작위로 크기를 조절하고 잘라내기
+                                                 transforms.RandomResizedCrop(self.image_size,
+                                                                              scale=(0.8, 1.0)),
+                                                 # 가우시안 블러 적용
+                                                 transforms.GaussianBlur(kernel_size=3,
+                                                                         sigma=(0.1, 2.0)),
+                                                 ])
+
         self.image_channels = image_channels
 
         self.annots = self._load_annotations()
 
-        self.num_classes = 10
+        self.num_classes = len(_LESIOM_TO_TRAIN_ID.keys())
 
     def __getitem__(self, index: int) -> Dict[str, Any]:
         annot = self._load_data(index)
@@ -90,19 +97,14 @@ class NIH(Dataset):
         path: str = annot['path']
         labels: np.array = annot['labels']
 
-
+        image = torch.from_numpy(image).permute(2, 0, 1)
         if self.transform:
-            transformed = self.transform(image=image)
-            image = transformed['image']
+            image = self.transform(image)
 
-        # Change the dimensions from (Height, Width, Channels) to (Channels, Height, Width)
-        image = torch.from_numpy(image).permute(2, 0, 1).float()  # Add .float() here
+        image = image/255.0
 
-        # Convert labels to a long tensor
-        labels = torch.from_numpy(labels).long()
-
-        return {'image': image,
-                'label': labels,
+        return {'image': image.float(),
+                'label': torch.from_numpy(labels).long(),
                 'path': str(path)}
 
     def __len__(self) -> int:

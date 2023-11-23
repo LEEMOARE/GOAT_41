@@ -60,3 +60,11 @@ def test_nih_load_data(nih_train: NIH):
         1024, 1024, 1), "The image should be 1024 x 1024 x 1"
     assert image.max() == 255.0, "The image should be normalized to 255.0"
     assert image.min() == 0.0, "The image should be normalized to 0.0"
+
+
+def test_nihset(nih_train: NIH):
+    nih_train.root_dir = Path(get_repo_root()) / 'data'
+    nih_train.image_channels = 3
+    dummy = nih_train[0]
+    logger.info(
+        f"{dummy['image'].shape}, {dummy['image'].max()}, { dummy['image'].min()}")
