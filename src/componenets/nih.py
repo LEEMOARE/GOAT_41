@@ -58,7 +58,6 @@ class NIH(Dataset):
     def __init__(self,
                  root_dir: str,
                  split: str = 'train',
-                 transform: Optional[Dict[str, Any]] = None,
                  image_size: Union[int, Tuple[int, int]] = (1024, 1024),
                  image_channels: int = 3,
                  **kwargs):
@@ -67,7 +66,7 @@ class NIH(Dataset):
         self.image_size = image_size if isinstance(image_size, tuple) \
             else (image_size, image_size)
 
-        if transform is None and split == 'train':
+        if split == 'train':
             self.transform = transforms.Compose([transforms.Resize(self.image_size),  # 이미지 크기 조정
                                                  transforms.RandomHorizontalFlip(),  # 데이터 증강을 위한 무작위 수평 뒤집기
                                                  transforms.RandomVerticalFlip(),  # 데이터 증강을 위한 무작위 수직 뒤집기
