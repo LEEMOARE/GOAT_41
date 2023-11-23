@@ -67,7 +67,7 @@ class NIH(Dataset):
         self.image_size = image_size if isinstance(image_size, tuple) \
             else (image_size, image_size)
 
-        if transform is None:
+        if transform is None and split == 'train':
             self.transform = transforms.Compose([transforms.Resize(self.image_size),  # 이미지 크기 조정
                                                  transforms.RandomHorizontalFlip(),  # 데이터 증강을 위한 무작위 수평 뒤집기
                                                  transforms.RandomVerticalFlip(),  # 데이터 증강을 위한 무작위 수직 뒤집기
@@ -89,7 +89,7 @@ class NIH(Dataset):
 
         self.annots = self._load_annotations()
 
-        self.num_classes = len(_LESIOM_TO_TRAIN_ID.keys())
+        self.num_classes = len(_LESIOM_TO_TRAIN_ID.keys()) - 1  # no-finding 제외
 
     def __getitem__(self, index: int) -> Dict[str, Any]:
         annot = self._load_data(index)
@@ -98,7 +98,8 @@ class NIH(Dataset):
         labels: np.array = annot['labels']
 
         image = torch.from_numpy(image).permute(2, 0, 1)
-        if self.transform:
+
+        if self.transform is not None:
             image = self.transform(image)
 
         image = image/255.0
