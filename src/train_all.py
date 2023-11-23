@@ -49,7 +49,7 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
     
 
 
-    for num_epoch in range(max_epoch):  # epoch
+    for num_epoch in range(max_epoch):  
         for num_iter, batch in enumerate(loader_train):
             image: torch.Tensor = batch['image']
             labels: torch.Tensor = batch['label']
@@ -84,19 +84,38 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
         with torch.no_grad():
                 correct = 0
                 total = 0
-                for images, labels in loader_test:
-                    images = images.to(device)
+                for num_iter, batch in enumerate(loader_valid):
+                    image: torch.Tensor = batch['image']
+                    labels: torch.Tensor = batch['label']
+                    image = image.to(device)
                     labels = labels.to(device)
-                    outputs = model(images)
+                    outputs = model(image)
                     _, predicted = torch.max(outputs.data, 1)
                     total += labels.size(0)
                     correct += (predicted == labels).sum().item()
+
+                    for idx_lesion in range(num_classes):
+                        sens_per_lesion[idx_lesion].update(
+                            outputs[:, idx_lesion], labels[:, idx_lesion])
+                        spec_per_lesion[idx_lesion].update(
+                            outputs[:, idx_lesion], labels[:, idx_lesion])
+
+                    computed_sens = [sens_per_lesion[idx_lesion].compute().item()
+                                    for idx_lesion in range(num_classes)]
+                    computed_spec = [spec_per_lesion[idx_lesion].compute().item()
+                                    for idx_lesion in range(num_classes)]
+
+                    if num_iter % 10 == 0:
+                        print(
+                            f'validation iteration {num_iter:5d} {num_iter/len(loader_valid)*100:.0f}')
+                        print(["{:.6f}".format(sens) for sens in computed_sens])
+                        print(["{:.6f}".format(spec) for spec in computed_spec])
 
                 if total > 0:
                     accuracy = correct / total
                     if accuracy > best_accuracy:
                         best_accuracy = accuracy
-                        torch.save(model.state_dict(), os.path.join(root_dir2, 'best_model.pth'))
+                        torch.save(model.state_dict(), os.path.join(root_dir2, 'best_model1.pth'))
                 else:
                     print("Warning: No valid data found.")
 
