@@ -6,6 +6,8 @@ import torch.nn as nn
 class NIHResNet(nn.Module):
     def __init__(self, name: str, num_classs: int = 5, out_indices=[4], return_logits=False):
         super().__init__()
+
+        # NOTE: 다른 모델도 써보고 싶습니다 ( 성민 )
         assert name in ['resnet50', 'resnet101']
         self.model = timm.create_model(name,
                                        pretrained=True,
