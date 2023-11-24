@@ -88,7 +88,7 @@ class NIH(Dataset):
 
         self.annots = self._load_annotations()
 
-        self.num_classes = len(_LESIOM_TO_TRAIN_ID.keys()) - 1  # no-finding 제외
+        self.num_classes = max(list(_LESIOM_TO_TRAIN_ID.values()))
 
     def __getitem__(self, index: int) -> Dict[str, Any]:
         annot = self._load_data(index)
