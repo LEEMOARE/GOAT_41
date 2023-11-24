@@ -71,7 +71,7 @@ def train(root_dir: str,
     # device setting
     device = f'cuda:{device}'
     # get model
-    model = NIHResNet(name=model_name, num_classs=10,
+    model = NIHResNet(name=model_name, num_classs=num_classes,
                       out_indices=[4], return_logits=True).to(device)
 
     criterion = torch.nn.BCEWithLogitsLoss(reduction='mean')
