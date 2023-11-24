@@ -25,7 +25,7 @@ class NIHResNet(nn.Module):
 
     def forward(self, x):
         features = self.model(x)[-1]  # last feature map (B 2048 H/32 )
-        logits = self.header(features)  # B, 5, 1, 1
+        logits = self.header(features)  # B, num_classes, 1, 1
         B, C, _, _ = logits.shape
         logits = logits.view(B, C)
         return logits if self.return_logits else torch.sigmoid(logits)

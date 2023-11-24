@@ -46,6 +46,8 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
                        for _ in range(num_classes)]
 
     for num_epoch in range(max_epoch):  # epoch
+        model.train()
+        model.return_logits = True
         for num_iter, batch in enumerate(loader_train):
             image: torch.Tensor = batch['image']
             labels: torch.Tensor = batch['label']
@@ -78,3 +80,17 @@ def train(root_dir: str, batch_size: int = 4, model_name: str = 'resnet50', devi
                 print(computed_spec)
 
         scheduler.step()
+        # epoch end
+
+        # save best model
+        with open(f'./model/{model_name}_best.pt', 'wb') as f:
+            model.cpu().eval()
+            torch.save(model.state_dict(), f)
+    # training end
+
+    # load best model
+    with open(f'./model/{model_name}_best.pt', 'rb') as f:
+        model.load_state_dict(torch.load(f, map_location='cpu'))
+
+    model.eval()
+    model.return_logits = False
