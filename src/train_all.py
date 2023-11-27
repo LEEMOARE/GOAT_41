@@ -168,40 +168,36 @@ def train(root_dir: str,
         # set model to train mode
         model.train().to(device)
         model.return_logits = True
-        reset_multi_meters(accs, sens, spec)
+        reset_multi_meters(accs_per_lesion, sens_per_lesion, spec_per_lesion)
 
         # iteration
         for num_iter, batch in enumerate(loader_train):
             # forward & backward with batch
-            _, probs, labels, loss = forward_backward_with_batch(batch, model,
-                                                                 optimizer, criterion,
-                                                                 device)
+            _, probs, labels, loss = forward_backward_with_batch(batch, model, optimizer,
+                                                                 criterion, device)
             # update meters
-            update_multi_meters(probs, labels,
-                                accs_per_lesion,
-                                sens_per_lesion,
-                                spec_per_lesion)
+            update_multi_meters(probs, labels, accs_per_lesion,
+                                sens_per_lesion, spec_per_lesion)
 
             if num_iter % 10 == 0:
-                computed_all = compute_multi_meters(accs_per_lesion,
-                                                    sens_per_lesion,
+                computed_all = compute_multi_meters(accs_per_lesion, sens_per_lesion,
                                                     spec_per_lesion)
                 progress = num_iter / len(loader_train) * 100
                 learning_rate = optimizer.param_groups[0]['lr']
-                print(_FORMAT_PER_ITER.format(num_epoch=num_epoch,
-                                              num_iter=num_iter,
-                                              progress=progress,
-                                              loss=loss.item(),
-                                              lr=learning_rate), end="  ")
-                print(_FORMAT_COMPUTED.format(acc=computed_all[0][0],
-                                              sens=computed_all[1][0],
+
+                print(_FORMAT_PER_ITER.format(num_epoch=num_epoch, num_iter=num_iter, progress=progress,
+                                              loss=loss.item(), lr=learning_rate), end="  ")
+
+                print(_FORMAT_COMPUTED.format(acc=computed_all[0][0], sens=computed_all[1][0],
                                               spec=computed_all[2][0]))
 
         # epoch end
         scheduler.step()
 
         # validate
-        computed = validate(loader_valid, model, [accs, sens, spec], device)
+        computed = validate(loader_valid, model,
+                            [accs_per_lesion, sens_per_lesion, spec_per_lesion],
+                            device)
         if best_acc < computed[0][0]:
             best_acc = computed[0][0]
             save_model(model, f'{model_name}-best.pth')
