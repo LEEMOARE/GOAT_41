@@ -145,8 +145,8 @@ def train(root_dir: str,
     # device setting
     device = f'cuda:{device}'
     # get model
-    model = NIHResNet(name=model_name, num_classs=num_classes,
-                      out_indices=[4], return_logits=True).to(device)
+    model = NIHResNet(name=model_name, num_classses=num_classes,
+                      return_logits=True).to(device)
 
     criterion = torch.nn.BCEWithLogitsLoss(reduction='mean')
     optimizer = torch.optim.RAdam(model.parameters(), lr=0.001)
@@ -204,4 +204,4 @@ def train(root_dir: str,
         computed = validate(loader_valid, model, [accs, sens, spec], device)
         if best_acc < computed[0][0]:
             best_acc = computed[0][0]
-            save_model(model, 'best.pth')
+            save_model(model, f'{model_name}-best.pth')
