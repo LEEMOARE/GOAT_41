@@ -166,7 +166,7 @@ def train(root_dir: str,
     # epoch
     for num_epoch in range(max_epoch):
         # set model to train mode
-        model.train()
+        model.train().to(device)
         model.return_logits = True
         reset_multi_meters(accs, sens, spec)
 
