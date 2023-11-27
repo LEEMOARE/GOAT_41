@@ -1,6 +1,6 @@
 import argparse
 
-from src.train_all_dskim import train
+from src.train_all import train
 
 
 def main(root_dir, batch_size, model_name, device, max_epoch, image_size):
