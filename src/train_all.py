@@ -202,6 +202,6 @@ def train(root_dir: str,
 
         # validate
         computed = validate(loader_valid, model, [accs, sens, spec], device)
-        if best_acc < computed[0]:
-            best_acc = computed[0]
+        if best_acc < computed[0][0]:
+            best_acc = computed[0][0]
             save_model(model, 'best.pth')
