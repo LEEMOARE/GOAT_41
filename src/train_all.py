@@ -1,20 +1,20 @@
 import torch
 import torch.nn as nn
-from torchmetrics import Recall, Specificity
-import os
-from src.componenets.nih import NIH
+import torchmetrics
+from torchmetrics import Accuracy, Recall, Specificity
+from tqdm import tqdm
+
+from src.componenets.nih import NIH, SimpleNIH
 from src.datamodules.datamodule import get_NIH_dataloader
 from src.models.resnet import NIHResNet
 
-
-_FORMAT_PER_ITER = '''
-epoch {num_epoch:03d}\titeration {num_iter:5d} {num_iter/len(loader_train)*100:.0f}\tloss: {loss.item():.4f}
-'''
+_FORMAT_PER_ITER = "epoch[{num_epoch:03d}]  iter[{num_iter:5d}][{progress:3.0f}%] | loss {loss:.4f} | lr {lr:.5f}"
+_FORMAT_COMPUTED = "Acc: {acc:.4f}, Sens: {sens:.4f}, Spec: {spec:.4f}"
 
 
 def forward_with_batch(batch: dict[str, torch.Tensor],
                        model: nn.Module,
-                       device: str) -> tuple(torch.Tensor, torch.Tensor):
+                       device: str) -> tuple[torch.Tensor, torch.Tensor]:
     image: torch.Tensor = batch['image']
     labels: torch.Tensor = batch['label']
     image = image.to(device)
@@ -38,10 +38,83 @@ def forward_backward_with_batch(batch: dict[str, torch.Tensor],
                                 model: nn.Module,
                                 optimizer: torch.optim.Optimizer,
                                 criterion: torch.nn.Module,
-                                device: str) -> tuple(torch.Tensor, torch.Tensor, torch.Tensor):
+                                device: str) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     logits, labels = forward_with_batch(batch, model, device)
     loss = backward_with_batch(logits, labels, optimizer, criterion)
-    return logits, labels, loss
+    probs = torch.sigmoid(logits)
+    return logits, probs, labels, loss
+
+
+def update_meters(logits: torch.Tensor, targets: torch.Tensor,
+                  meters: list[torchmetrics.Metric]):
+    meters = meters if isinstance(meters, list) else [meters]
+    for idx_lesion, meter in enumerate(meters):
+        p = logits[:, idx_lesion]
+        t = targets[:, idx_lesion]
+        meter[idx_lesion].update(p, t)
+
+
+def update_multi_meters(logits: torch.Tensor, targets: torch.Tensor,
+                        *args: list[torchmetrics.Metric]):
+    for meter in args:
+        update_meters(logits, targets, meter)
+
+
+def reset_meters(meters: list[torchmetrics.Metric]):
+    meters = meters if isinstance(meters, list) else [meters]
+    for meter in meters:
+        meter.reset()
+
+
+def reset_multi_meters(*args: torchmetrics.Metric):
+    for meter in args:
+        reset_meters(meter)
+
+
+def compute_meters(meters: list[torchmetrics.Metric]) -> list[float]:
+    meters = meters if isinstance(meters, list) else [meters]
+    computed = []
+    for meter in meters:
+        computed.append(meter.compute().item())
+    return computed
+
+
+def compute_multi_meters(*args: torchmetrics.Metric) -> list[list[float]]:
+    computed = []
+    for meter in args:
+        computed.append(compute_meters(meter))
+    return computed
+
+
+def save_model(model: nn.Module, save_dir: str):
+    model = model.cpu().eval()
+    torch.save(model.state_dict(), save_dir)
+
+
+def load_model(model: nn.Module, load_dir: str):
+    model.load_state_dict(torch.load(load_dir,
+                                     map_location='cpu'),
+                          strict=True)
+
+
+@torch.no_grad()
+def validate(loader,
+             model: nn.Module,
+             meters: list[torchmetrics.Metric],
+             device: str):
+    model.eval()
+    model.return_logits = True
+    for meter in meters:
+        meter.reset()
+
+    for batch in tqdm(loader):
+        probs, labels = forward_with_batch(batch, model, device)
+        update_multi_meters(probs, labels, *meters)
+
+    computed = compute_multi_meters(*meters)
+    print(
+        f"Validation Acc: {computed[0]}, Sens: {computed[1]}, Spec: {computed[2]}")
+    return computed
 
 
 def train(root_dir: str,
@@ -49,15 +122,16 @@ def train(root_dir: str,
           model_name: str = 'resnet50',
           device: int = 0,
           max_epoch: int = 100,
+          image_size: int = 512,
           save_dir: str = None):
 
     # get NIH - dataset
-    trainset = NIH(root_dir=root_dir, split='train',
-                   image_size=512, image_channels=3)
-    testset = NIH(root_dir=root_dir, split='test',
-                  image_size=512, image_channels=3)
-    validset = NIH(root_dir=root_dir, split='val',
-                   image_size=512, image_channels=3)
+    trainset = SimpleNIH(root_dir=root_dir, split='train',
+                         image_size=image_size, image_channels=3)
+    testset = SimpleNIH(root_dir=root_dir, split='test',
+                        image_size=image_size, image_channels=3)
+    validset = SimpleNIH(root_dir=root_dir, split='val',
+                         image_size=image_size, image_channels=3)
 
     num_classes = trainset.num_classes
 
@@ -75,100 +149,59 @@ def train(root_dir: str,
                       out_indices=[4], return_logits=True).to(device)
 
     criterion = torch.nn.BCEWithLogitsLoss(reduction='mean')
-    optimizer = torch.optim.RAdam(model.parameters(), lr=0.0005)
+    optimizer = torch.optim.RAdam(model.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
                                                      milestones=[50, 70],
                                                      gamma=0.1)
 
-    sens = Recall(task='binary', num_classes=1).to(device)
-    spec = Specificity(task='binary', num_classes=1).to(device)
+    accs = Accuracy(task='binary', num_classes=1, threshold=0.5).to(device)
+    sens = Recall(task='binary', num_classes=1, threshold=0.5).to(device)
+    spec = Specificity(task='binary', num_classes=1, threshold=0.5).to(device)
+    accs_per_lesion = [accs.clone() for _ in range(num_classes)]
     sens_per_lesion = [sens.clone() for _ in range(num_classes)]
     spec_per_lesion = [spec.clone() for _ in range(num_classes)]
+
+    best_acc = -1
 
     # epoch
     for num_epoch in range(max_epoch):
         # set model to train mode
         model.train()
         model.return_logits = True
+        reset_multi_meters(accs, sens, spec)
 
         # iteration
         for num_iter, batch in enumerate(loader_train):
             # forward & backward with batch
-            logits, labels, loss = forward_backward_with_batch(batch, model,
-                                                               optimizer, criterion,
-                                                               device)
-            # evaluation with batch
-            for idx_lesion in range(num_classes):
-                p, t = logits[:, idx_lesion], labels[:, idx_lesion]
-                sens_per_lesion[idx_lesion].update(p, t)
-                spec_per_lesion[idx_lesion].update(p, t)
-
-            computed_sens = [sens_per_lesion[idx_lesion].compute()
-                             for idx_lesion in range(num_classes)]
-            computed_spec = [spec_per_lesion[idx_lesion].compute()
-                             for idx_lesion in range(num_classes)]
+            _, probs, labels, loss = forward_backward_with_batch(batch, model,
+                                                                 optimizer, criterion,
+                                                                 device)
+            # update meters
+            update_multi_meters(probs, labels,
+                                accs_per_lesion,
+                                sens_per_lesion,
+                                spec_per_lesion)
 
             if num_iter % 10 == 0:
+                computed_all = compute_multi_meters(accs_per_lesion,
+                                                    sens_per_lesion,
+                                                    spec_per_lesion)
+                progress = num_iter / len(loader_train) * 100
+                learning_rate = optimizer.param_groups[0]['lr']
                 print(_FORMAT_PER_ITER.format(num_epoch=num_epoch,
                                               num_iter=num_iter,
-                                              loss=loss.item()))
-
-                print(["{:.4f}".format(sens.item()) for sens in computed_sens])
-                print(["{:.4f}".format(spec.item()) for spec in computed_spec])
+                                              progress=progress,
+                                              loss=loss.item(),
+                                              lr=learning_rate), end="  ")
+                print(_FORMAT_COMPUTED.format(acc=computed_all[0][0],
+                                              sens=computed_all[1][0],
+                                              spec=computed_all[2][0]))
 
         # epoch end
-        for _sens, _spec in zip(sens_per_lesion, spec_per_lesion):
-            _sens.reset()
-            _spec.reset()
+        scheduler.step()
 
-        model.eval()
-        model.return_logits = False
-        best_accuracy = 0.0  # 초기 최고 정확도
-        with torch.no_grad():
-            correct = 0
-            total = 0
-            for num_iter, batch in enumerate(loader_valid):
-                probs, labels = forward_with_batch(batch, model, device)
-                # Generate predictions based on the threshold
-                predicted = (probs.ge(0.5)).float()
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-
-                # Use probs instead of outputs
-                print(f'Outputs for iteration {num_iter}: {probs}')
-
-                for idx_lesion in range(num_classes):
-                    sens_per_lesion[idx_lesion].update(
-                        probs[:, idx_lesion], labels[:, idx_lesion])  # Use probs instead of outputs
-                    spec_per_lesion[idx_lesion].update(
-                        probs[:, idx_lesion], labels[:, idx_lesion])  # Use probs instead of outputs
-
-                computed_sens = [sens_per_lesion[idx_lesion].compute().item()
-                                 for idx_lesion in range(num_classes)]
-                computed_spec = [spec_per_lesion[idx_lesion].compute().item()
-                                 for idx_lesion in range(num_classes)]
-
-                # Print additional information for each 10 iterations
-                if num_iter % 10 == 0:
-                    print(
-                        f'Validation iteration {num_iter:5d} {num_iter/len(loader_valid)*100:.0f}')
-                    print(f'Predicted: {predicted}')
-                    print(f'Labels: {labels}')
-                    print(["{:.6f}".format(sens) for sens in computed_sens])
-                    print(["{:.6f}".format(spec) for spec in computed_spec])
-                    print('')
-
-            accuracy = correct / total
-            print(f'Accuracy on validation set: {accuracy:.4f}')
-
-            # 모델 저장
-            save_dir = "/home/ubuntu/miniforge3/etc/GOAT_41/GOAT_41" if save_dir is None else save_dir
-            if accuracy > best_accuracy:
-                best_accuracy = accuracy
-                model_path = os.path.join(save_dir, 'best_model.pth')
-                torch.save(model.state_dict(), model_path)
-                print('Best model saved with accuracy {:.4f}'.format(
-                    best_accuracy))
-                model.train()
-
-                scheduler.step()
+        # validate
+        computed = validate(loader_valid, model, [accs, sens, spec], device)
+        if best_acc < computed[0]:
+            best_acc = computed[0]
+            save_model(model, 'best.pth')

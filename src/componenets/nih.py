@@ -66,6 +66,7 @@ class NIH(Dataset):
         self.image_size = image_size if isinstance(image_size, tuple) \
             else (image_size, image_size)
 
+        self.transform = None
         if split == 'train':
             self.transform = transforms.Compose([transforms.Resize(self.image_size),  # 이미지 크기 조정
                                                  transforms.RandomHorizontalFlip(),  # 데이터 증강을 위한 무작위 수평 뒤집기
@@ -176,3 +177,22 @@ class NIH(Dataset):
                 'view_position': view_position,
                 'label_names': label_names,
                 'labels': train_ids}
+
+
+class SimpleNIH(NIH):
+    def __init__(self, root_dir: str,
+                 split: str = 'train',
+                 image_size: int = 512,
+                 image_channels: int = 3, **kwargs):
+        super().__init__(root_dir, split, image_size, image_channels, **kwargs)
+
+        # This class take only normal and abnormal classes
+        self.num_classes = 1
+
+    def _load_data(self, idx):
+        dummy = super()._load_data(idx)
+        label_names: List[str] = dummy['label_names']
+        labels = [0] if 'nofinding' in label_names else [1]
+        labels = np.array(labels, dtype=np.int32)
+        dummy['labels'] = labels
+        return dummy
