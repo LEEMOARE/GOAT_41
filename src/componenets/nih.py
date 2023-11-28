@@ -1,3 +1,4 @@
+import random
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -60,6 +61,8 @@ class NIH(Dataset):
                  split: str = 'train',
                  image_size: Union[int, Tuple[int, int]] = (1024, 1024),
                  image_channels: int = 3,
+                 train_lesion: Optional[List[int]] = None,
+                 ratio: float = -1.0,
                  **kwargs):
         self.root_dir = root_dir
         self.split = split
@@ -87,9 +90,17 @@ class NIH(Dataset):
 
         self.image_channels = image_channels
 
-        self.annots = self._load_annotations()
+        if train_lesion is None:
+            self.num_classes = max(list(_LESIOM_TO_TRAIN_ID.values()))
+            self.mapper = None
+        else:
+            self.train_lesion = train_lesion
+            self.num_classes = len(self.train_lesion)
+            self.mapper = {lesion: i for i,
+                           lesion in enumerate(self.train_lesion)}
 
-        self.num_classes = max(list(_LESIOM_TO_TRAIN_ID.values()))
+        self.ratio = ratio if self.split == 'train' else -1.0
+        self.annots = self._load_annotations()
 
     def __getitem__(self, index: int) -> Dict[str, Any]:
         annot = self._load_data(index)
@@ -109,22 +120,57 @@ class NIH(Dataset):
                 'path': str(path)}
 
     def __len__(self) -> int:
-        return len(self.annots)
+        return self.total_length
 
     def _load_annotations(self):
         path = Path(get_repo_root()) / 'data/nih.zip'
-        annots = load_json(path)
+        anns = load_json(path)
 
-        # filter by split
-        annots = [annot for annot in annots if annot['split'] == self.split]
+        # split train, test, valid
+        anns = [ann for ann in anns if ann['split'] == self.split]
 
-        # filter normal class
+        self.idx_normal = []
+        self.idx_abnormal = []
+        for i, ann in enumerate(anns):
+            if any(label_index in self.mapper for label_index in ann['label_indexes']):
+                self.idx_abnormal.append(i)
+            else:
+                self.idx_normal.append(i)
 
-        # do something
+        self.len_normal = len(self.idx_normal)
+        self.len_abnormal = len(self.idx_abnormal)
+        # it dosen`t works when len_abnormal > len_normal
+        self.total_length = self.len_abnormal + self.len_normal if self.len_abnormal > self.len_normal or self.ratio < 0 \
+            else self.len_abnormal + int(self.len_abnormal * self.ratio)
+        return anns
 
-        return annots
+    def _label_to_onehot(self, label_indexes: List[int]) -> np.array:
+        # create empty one-hot vector
+        train_ids = np.zeros((self.num_classes,), dtype=np.int32)
+
+        # convert label_indexes to multi-label one-hot vector
+        if 9 in label_indexes:
+            return train_ids  # no-finding
+
+        if self.mapper is not None:
+            for label_index in label_indexes:
+                if label_index not in self.mapper:
+                    continue
+                train_ids[self.mapper[label_index]] = 1
+        else:
+            for label_index in label_indexes:
+                if label_index not in list(_LESIOM_TO_TRAIN_ID.keys()):
+                    continue
+                train_ids[_LESIOM_TO_TRAIN_ID[label_index]-1] = 1
+        return train_ids
 
     def _load_data(self, idx) -> Dict[str, Any]:
+        if self.ratio > 0:
+            if self.len_abnormal <= idx:
+                idx = self.idx_normal[int(
+                    random.uniform(0, self.len_normal - 1))]
+            else:
+                idx = self.idx_abnormal[idx]
         annot = self.annots[idx]
         filename = annot['filename']
         gender = annot['gender']
@@ -133,19 +179,7 @@ class NIH(Dataset):
         label_names = annot['label_names']
         label_indexes: List[int] = annot['label_indexes']
 
-        train_ids = np.zeros((10,), dtype=np.int32)
-        # convert label_indexes to multi-label one-hot vector
-        if 9 in label_indexes and len(label_indexes) > 1:
-            # no-finding is not the only label
-            raise ValueError('no-finding is not the only label')
-
-        for label_index in label_indexes:
-            if label_index not in list(_LESIOM_TO_TRAIN_ID.keys()):
-                continue
-
-            if label_index == 9:
-                continue
-            train_ids[_LESIOM_TO_TRAIN_ID[label_index]-1] = 1
+        train_ids = self._label_to_onehot(label_indexes)
 
         image_path = Path(self.root_dir) / filename
         image = cv2.imread(str(image_path), cv2.IMREAD_UNCHANGED)
@@ -180,11 +214,15 @@ class NIH(Dataset):
 
 
 class SimpleNIH(NIH):
-    def __init__(self, root_dir: str,
+    def __init__(self,
+                 root_dir: str,
                  split: str = 'train',
-                 image_size: int = 512,
-                 image_channels: int = 3, **kwargs):
-        super().__init__(root_dir, split, image_size, image_channels, **kwargs)
+                 image_size: Union[int, Tuple[int, int]] = (1024, 1024),
+                 image_channels: int = 3,
+                 train_lesion: Optional[List[int]] = None,
+                 ratio: float = -1.0):
+        super().__init__(root_dir, split, image_size,
+                         image_channels, train_lesion, ratio)
 
         # This class take only normal and abnormal classes
         self.num_classes = 1

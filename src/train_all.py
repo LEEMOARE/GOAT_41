@@ -124,13 +124,16 @@ def train(root_dir: str,
           image_size: int = 512,
           save_dir: str = None):
 
+    _DATASET = NIH  # SimpleNIH
+    _TRAIN_LESION = [1, 12]  # PE, PTX
+    # _TRAIN_LESION = None
     # get NIH - dataset
-    trainset = SimpleNIH(root_dir=root_dir, split='train',
-                         image_size=image_size, image_channels=3)
-    testset = SimpleNIH(root_dir=root_dir, split='test',
+    trainset = _DATASET(root_dir=root_dir, split='train', train_lesion=_TRAIN_LESION,
+                        image_size=image_size, image_channels=3, ratio=1.0)
+    testset = _DATASET(root_dir=root_dir, split='test', train_lesion=_TRAIN_LESION,
+                       image_size=image_size, image_channels=3)
+    validset = _DATASET(root_dir=root_dir, split='val', train_lesion=_TRAIN_LESION,
                         image_size=image_size, image_channels=3)
-    validset = SimpleNIH(root_dir=root_dir, split='val',
-                         image_size=image_size, image_channels=3)
 
     num_classes = trainset.num_classes
 
