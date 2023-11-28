@@ -77,14 +77,20 @@ def cvt_image_to_tensor(image: np.ndarray) -> torch.Tensor:
     return image
 
 
-def post_process_cam(prob: float, cam: np.ndarray, image: np.ndarray, threshold: float = 0.5) -> np.ndarray:
+def post_process_cam(prob, actmap: np.ndarray, image: np.ndarray, threshold: 0.5) -> np.ndarray:
     if prob < threshold:
-        return np.zeros_like(cam)
-    print(cam.shape, cam.dtype, cam.sum())
-    new_cam = copy.deepcopy(cam)
-    new_cam = np.where(new_cam > 0.5, 1, 0).astype(np.uint8)
-    contours, _ = cv2.findContours(new_cam, cv2.RETR_EXTERNAL,
+        draw = copy.deepcopy(image)
+        mask = np.zeros_like(image)
+        return draw, mask
+    actmap = min_max_norm(actmap)
+    new_cam = copy.deepcopy(actmap)
+
+    # for calc contours
+    new_cam2 = np.where(new_cam > threshold, 1, 0).astype(np.uint8)
+    contours, _ = cv2.findContours(new_cam2, cv2.RETR_EXTERNAL,
                                    cv2.CHAIN_APPROX_SIMPLE)
+
+    new_cam = np.where(new_cam > threshold, new_cam, 0)
 
     filtered_contours = []
     for contour in contours:
@@ -92,9 +98,9 @@ def post_process_cam(prob: float, cam: np.ndarray, image: np.ndarray, threshold:
         max_value = np.max(new_cam * (cv2.drawContours(np.zeros_like(new_cam),
                                                        [contour], 0, 1,
                                                        thickness=cv2.FILLED)))
-
         # 최대 값이 0.9 이상인 경우만 남기기
-        if max_value >= 0.9:
+        print(max_value)
+        if max_value >= 0.8:
             filtered_contours.append(contour)
     # 원본에 컨투어 그리기
     if image.shape[-1] == 1:
@@ -104,7 +110,7 @@ def post_process_cam(prob: float, cam: np.ndarray, image: np.ndarray, threshold:
                             filtered_contours, -1, (255, 0, 255), 2)
     mask = cv2.drawContours(np.zeros_like(image),
                             filtered_contours, -1, 1, -1)
-    mask = cv2.cvtColor(cam, cv2.COLOR_GRAY2RGB) * mask
+    mask = cv2.cvtColor(actmap, cv2.COLOR_GRAY2RGB) * mask
     mask = cv2.cvtColor(mask, cv2.COLOR_RGB2GRAY)
     return draw, mask
 

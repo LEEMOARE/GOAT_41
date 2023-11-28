@@ -1,3 +1,6 @@
+import copy
+
+import numpy as np
 import torch
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
@@ -34,10 +37,11 @@ class PleuralEffusion():
 
         # for GradCAM
         actmap = self.cam(input_tensor=image, targets=self.targets)[0, :]
-        prob = self.model(image)[0][0]
-        draw, mask = uc.post_process_cam(prob, actmap,
-                                         image_origin,
-                                         threshold=0.5)
+        prob = self.model(image)[0]
+        if len(prob.shape) > 0:
+            prob = prob[0]
+        prob = prob.item()
+        draw, mask = uc.post_process_cam(prob, actmap, image_origin, 0.5)
         return {'image': image_origin,
                 'probabilty': prob,
                 'processed_activation_map': mask,
