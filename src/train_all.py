@@ -100,12 +100,11 @@ def load_model(model: nn.Module, load_dir: str):
 @torch.no_grad()
 def validate(loader,
              model: nn.Module,
-             meters: list[torchmetrics.Metric],
+             meters: list[list[torchmetrics.Metric]],
              device: str):
     model.eval()
     model.return_logits = True
-    for meter in meters:
-        meter.reset()
+    reset_multi_meters(*meters)
 
     for batch in tqdm(loader):
         probs, labels = forward_with_batch(batch, model, device)
@@ -190,7 +189,6 @@ def train(root_dir: str,
 
                 print(_FORMAT_COMPUTED.format(acc=computed_all[0][0], sens=computed_all[1][0],
                                               spec=computed_all[2][0]))
-
         # epoch end
         scheduler.step()
 
