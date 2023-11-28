@@ -126,6 +126,7 @@ def train(root_dir: str,
 
     _DATASET = NIH  # SimpleNIH
     _TRAIN_LESION = [1, 12]  # PE, PTX
+    # _TRAIN_LESION = [3]  # Atelactasis
     # _TRAIN_LESION = None
     # get NIH - dataset
     trainset = _DATASET(root_dir=root_dir, split='train', train_lesion=_TRAIN_LESION,
@@ -201,4 +202,6 @@ def train(root_dir: str,
                             device)
         if best_acc < computed[0][0]:
             best_acc = computed[0][0]
-            save_model(model, f'{model_name}-best.pth')
+            tmp_lesion = [str(lesion) for lesion in _TRAIN_LESION]
+            save_model(
+                model, f'{model_name}_{"_".join(tmp_lesion)}-best.pth')
