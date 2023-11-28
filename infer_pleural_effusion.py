@@ -10,8 +10,8 @@ _WEIGHTS_PATH = '/opt/goat_41/resnet50_1_12.pth'
 
 
 class PleuralEffusion():
-    def __init__(self, model=NIHResNet, weights=_WEIGHTS_PATH, device: int = 0,
-                 image_size: int = 512):
+    def __init__(self, model=NIHResNet, weights=_WEIGHTS_PATH,
+                 device: int = 0, image_size: int = 512):
         model_name, lesions = uc.get_info_from_name(weights)
         self.model_name = model_name
         self.num_classes = len(lesions)
@@ -35,10 +35,10 @@ class PleuralEffusion():
         # for GradCAM
         actmap = self.cam(input_tensor=image, targets=self.targets)[0, :]
         prob = self.model(image)[0][0]
-        processed_actmap = uc.post_process_cam(prob, actmap,
-                                               image_origin,
-                                               threshold=0.5)
+        draw, mask = uc.post_process_cam(prob, actmap,
+                                         image_origin,
+                                         threshold=0.5)
         return {'image': image_origin,
                 'probabilty': prob,
-                'activation_map': actmap,
-                'processed_activation_map': processed_actmap}
+                'processed_activation_map': mask,
+                'overlay_image': draw}

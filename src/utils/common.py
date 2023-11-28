@@ -80,13 +80,13 @@ def cvt_image_to_tensor(image: np.ndarray) -> torch.Tensor:
 def post_process_cam(prob: float, cam: np.ndarray, image: np.ndarray, threshold: float = 0.5) -> np.ndarray:
     if prob < threshold:
         return np.zeros_like(cam)
+    print(cam.shape, cam.dtype, cam.sum())
     new_cam = copy.deepcopy(cam)
     new_cam = np.where(new_cam > 0.5, 1, 0).astype(np.uint8)
     contours, _ = cv2.findContours(new_cam, cv2.RETR_EXTERNAL,
                                    cv2.CHAIN_APPROX_SIMPLE)
 
     filtered_contours = []
-
     for contour in contours:
         # 컨투어 내부의 최대 값 찾기
         max_value = np.max(new_cam * (cv2.drawContours(np.zeros_like(new_cam),
@@ -100,8 +100,13 @@ def post_process_cam(prob: float, cam: np.ndarray, image: np.ndarray, threshold:
     if image.shape[-1] == 1:
         image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
 
-    image = cv2.drawContours(image, filtered_contours, -1, (255, 0, 255), 2)
-    return image
+    draw = cv2.drawContours(copy.deepcopy(image),
+                            filtered_contours, -1, (255, 0, 255), 2)
+    mask = cv2.drawContours(np.zeros_like(image),
+                            filtered_contours, -1, 1, -1)
+    mask = cv2.cvtColor(cam, cv2.COLOR_GRAY2RGB) * mask
+    mask = cv2.cvtColor(mask, cv2.COLOR_RGB2GRAY)
+    return draw, mask
 
 
 def load_weights(model: torch.nn.Module, weights: str) -> torch.nn.Module:
