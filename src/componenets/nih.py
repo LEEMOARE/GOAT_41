@@ -33,11 +33,12 @@ _LESIOM_TO_TRAIN_ID = {9: 0,  # nofinding train id is 0
                        3: 3,  # atelectasis train id is 3
                        12: 4,  # pneumothorax train id is 4
                        15: 5,  # infiltration train id is 5
-                       2: 6,  # emphysema train id is 6
-                       4: 7,  # edema train id is 7
-                       5: 8,  # consolidation train id is 8
-                       6: 9,  # pleural_thickening train id is 9
-                       10: 10}  # cardiomegaly train id is 10
+                       }
+#    2: 6,  # emphysema train id is 6
+#    4: 7,  # edema train id is 7
+#    5: 8,  # consolidation train id is 8
+#    6: 9,  # pleural_thickening train id is 9
+#    10: 10}  # cardiomegaly train id is 10
 
 
 class NIH(Dataset):
@@ -117,6 +118,7 @@ class NIH(Dataset):
 
         return {'image': image.float(),
                 'label': torch.from_numpy(labels).long(),
+                'label_name': '_'.join(annot['label_names']),
                 'path': str(path)}
 
     def __len__(self) -> int:
@@ -128,6 +130,10 @@ class NIH(Dataset):
 
         # split train, test, valid
         anns = [ann for ann in anns if ann['split'] == self.split]
+
+        if self.mapper is None:
+            self.total_length = len(anns)
+            return anns
 
         self.idx_normal = []
         self.idx_abnormal = []

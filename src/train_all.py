@@ -125,8 +125,8 @@ def train(root_dir: str,
           save_dir: str = None):
 
     _DATASET = NIH  # SimpleNIH
-    _TRAIN_LESION = [1, 12]  # PE, PTX
-    # _TRAIN_LESION = [3]  # Atelactasis
+    # _TRAIN_LESION = [1, 12]  # PE, PTX
+    _TRAIN_LESION = [3]  # Atelactasis
     # _TRAIN_LESION = None
     # get NIH - dataset
     trainset = _DATASET(root_dir=root_dir, split='train', train_lesion=_TRAIN_LESION,
