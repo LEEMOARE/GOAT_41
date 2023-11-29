@@ -139,7 +139,7 @@ def train(root_dir: str,
     testset = _DATASET(root_dir=root_dir, split='test', train_lesion=_TRAIN_LESION,
                        image_size=image_size, image_channels=3)
     validset = _DATASET(root_dir=root_dir, split='val', train_lesion=_TRAIN_LESION,
-                        image_size=image_size, image_channels=3)
+                        image_size=image_size, image_channels=3, ratio=1.0)
 
     num_classes = trainset.num_classes
 
@@ -157,7 +157,7 @@ def train(root_dir: str,
                       return_logits=True).to(device)
 
     criterion = torch.nn.BCEWithLogitsLoss(reduction='mean')
-    optimizer = torch.optim.RAdam(model.parameters(), lr=0.0001)
+    optimizer = torch.optim.RAdam(model.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
                                                      milestones=[5, 8],
                                                      gamma=0.1)

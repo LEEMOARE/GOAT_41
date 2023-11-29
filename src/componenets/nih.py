@@ -100,7 +100,7 @@ class NIH(Dataset):
             self.mapper = {lesion: i for i,
                            lesion in enumerate(self.train_lesion)}
 
-        self.ratio = ratio if self.split == 'train' else -1.0
+        self.ratio = ratio  # if self.split == 'train' else -1.0
         self.annots = self._load_annotations()
 
     def __getitem__(self, index: int) -> Dict[str, Any]:
