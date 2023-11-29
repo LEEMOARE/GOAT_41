@@ -98,8 +98,7 @@ def post_process_cam(prob, actmap: np.ndarray, image: np.ndarray, threshold: 0.5
         max_value = np.max(new_cam * (cv2.drawContours(np.zeros_like(new_cam),
                                                        [contour], 0, 1,
                                                        thickness=cv2.FILLED)))
-        # 최대 값이 0.9 이상인 경우만 남기기
-        print(max_value)
+        # 최대 값이 0.8 이상인 경우만 남기기
         if max_value >= 0.8:
             filtered_contours.append(contour)
     # 원본에 컨투어 그리기

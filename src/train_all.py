@@ -120,14 +120,19 @@ def train(root_dir: str,
           batch_size: int = 4,
           model_name: str = 'resnet50',
           device: int = 0,
-          max_epoch: int = 100,
+          max_epoch: int = 10,
           image_size: int = 512,
           save_dir: str = None):
 
     _DATASET = NIH  # SimpleNIH
     # _TRAIN_LESION = [1, 12]  # PE, PTX
-    _TRAIN_LESION = [3]  # Atelactasis
-    # _TRAIN_LESION = None
+    # _TRAIN_LESION = [3]  # Atelactasis
+    # _TRAIN_LESION = [10]  # cardiomegaly
+    # _TRAIN_LESION = [12]  # pneumothorax
+    # _TRAIN_LESION = [15]  # infiltration
+    # _TRAIN_LESION = [5]  # consolidation
+    _TRAIN_LESION = [10, 12]  # cardiomegaly, pneumothorax
+
     # get NIH - dataset
     trainset = _DATASET(root_dir=root_dir, split='train', train_lesion=_TRAIN_LESION,
                         image_size=image_size, image_channels=3, ratio=1.0)
@@ -152,9 +157,9 @@ def train(root_dir: str,
                       return_logits=True).to(device)
 
     criterion = torch.nn.BCEWithLogitsLoss(reduction='mean')
-    optimizer = torch.optim.RAdam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.RAdam(model.parameters(), lr=0.0001)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
-                                                     milestones=[50, 70],
+                                                     milestones=[5, 8],
                                                      gamma=0.1)
 
     accs = Accuracy(task='binary', num_classes=1, threshold=0.5).to(device)
@@ -182,7 +187,7 @@ def train(root_dir: str,
             update_multi_meters(probs, labels, accs_per_lesion,
                                 sens_per_lesion, spec_per_lesion)
 
-            if num_iter % 10 == 0:
+            if num_iter % 50 == 0:
                 computed_all = compute_multi_meters(accs_per_lesion, sens_per_lesion,
                                                     spec_per_lesion)
                 progress = num_iter / len(loader_train) * 100
