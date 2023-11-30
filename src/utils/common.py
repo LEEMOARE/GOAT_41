@@ -77,7 +77,7 @@ def cvt_image_to_tensor(image: np.ndarray) -> torch.Tensor:
     return image
 
 
-def post_process_cam(prob, actmap: np.ndarray, image: np.ndarray, threshold: 0.5) -> np.ndarray:
+def post_process_cam(prob, actmap: np.ndarray, image: np.ndarray, threshold: 0.5, color_contour=(255,0,255)) -> np.ndarray:
     if prob < threshold:
         draw = copy.deepcopy(image)
         mask = np.zeros_like(image)
@@ -106,7 +106,7 @@ def post_process_cam(prob, actmap: np.ndarray, image: np.ndarray, threshold: 0.5
         image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
 
     draw = cv2.drawContours(copy.deepcopy(image),
-                            filtered_contours, -1, (255, 0, 255), 2)
+                            filtered_contours, -1, color_contour, 1)
     mask = cv2.drawContours(np.zeros_like(image),
                             filtered_contours, -1, 1, -1)
     mask = cv2.cvtColor(actmap, cv2.COLOR_GRAY2RGB) * mask
